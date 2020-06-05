@@ -1,0 +1,50 @@
+on:
+  push:
+    branches:
+      - master    # 実行対象ブランチ
+    paths:
+      - 'api/*'   # api以下のファイル更新時のみ実行されるようにする
+
+env:
+  NODE_VERSION: '8.x'          # aglioは8系が必要
+  NAME: siwa32
+  EMAIL: siwa32@gmail.com
+  REPO: aglio-ghp-demo
+  BUILDED_BRANCH: docs
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    # aglioによりhtml生成
+    - name: npm install, build
+      run: |
+        # Build project
+        npm install
+        npm run build --if-present
+      shell: bash
+
+    - name: git config settings
+      run: |
+        git config user.name ${{ env.NAME }}
+        git config user.email ${{ env.EMAIL }}
+        git remote set-url origin https://${{ env.NAME }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ env.NAME }}/${{ env.REPO }}
+
+    # build/*.htmlをdocs/にコピーしてcommit and push
+    - name: commit and push to public branch
+      run: |
+        git checkout master
+        git branch -a
+        cp build/*.html docs/
+        git add docs/*.html
+        git commit -m "update api spec"
+        git push origin master
+      shell: bash
