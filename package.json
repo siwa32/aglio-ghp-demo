@@ -14,5 +14,8 @@
     "url": "git@github.com:siwa32/aglio-ghp-demo.git"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "aglio": "^2.3.0"
+  }
 }
